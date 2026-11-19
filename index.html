@@ -1,0 +1,933 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>VisionAI Studio — Teachable Machine Community Classifier</title>
+  
+  <!-- Tailwind CSS via CDN (100% Static / GitHub Pages Compatible) -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  
+  <!-- Google Fonts: Inter & JetBrains Mono for Typographic Hierarchy & Unity -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  
+  <!-- Font Awesome for Consistent Iconography (Rhythm & Repetition) -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+
+  <!-- TensorFlow.js & Google Teachable Machine Image Library -->
+  <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@latest/dist/tf.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@teachablemachine/image@latest/dist/teachablemachine-image.min.js"></script>
+
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', 'system-ui', 'sans-serif'],
+            mono: ['JetBrains Mono', 'monospace'],
+          },
+          colors: {
+            obsidian: '#090D16',
+            slateSurface: '#111827',
+            cardSurface: '#161F33',
+          }
+        }
+      }
+    }
+  </script>
+</head>
+<body class="bg-obsidian text-slate-100 font-sans antialiased selection:bg-indigo-500 selection:text-white overflow-x-hidden">
+
+  <!-- Ambient Background Radial Glows for Visual Depth & Unity -->
+  <div class="fixed inset-0 pointer-events-none z-0 overflow-hidden">
+    <div class="absolute -top-40 -left-40 w-96 h-96 bg-indigo-600/20 rounded-full blur-3xl"></div>
+    <div class="absolute top-1/3 -right-32 w-[30rem] h-[30rem] bg-emerald-500/10 rounded-full blur-3xl"></div>
+    <div class="absolute bottom-0 left-1/4 w-96 h-96 bg-violet-600/15 rounded-full blur-3xl"></div>
+  </div>
+
+  <!-- Navigation Header (Balance, Alignment & Rhythm) -->
+  <header class="sticky top-0 z-40 backdrop-blur-xl bg-obsidian/80 border-b border-slate-800/80">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+      <!-- Brand Identity -->
+      <a href="#" class="flex items-center gap-3 group">
+        <div class="w-9 h-9 rounded-xl bg-gradient-to-br from-indigo-500 to-emerald-400 flex items-center justify-center text-slate-950 font-bold shadow-lg shadow-indigo-500/20 group-hover:scale-105 transition-transform">
+          <i class="fa-solid fa-brain text-base"></i>
+        </div>
+        <div>
+          <span class="font-bold tracking-tight text-white text-lg">VisionAI</span>
+          <span class="hidden sm:inline-block ml-2 text-xs font-mono px-2 py-0.5 rounded-full bg-indigo-500/15 text-indigo-300 border border-indigo-500/30">
+            GitHub Pages Ready
+          </span>
+        </div>
+      </a>
+
+      <!-- Navigation Links -->
+      <nav class="hidden md:flex items-center gap-8 text-sm font-medium text-slate-300">
+        <a href="#inference-studio" class="hover:text-white transition-colors">AI Classifier</a>
+        <a href="#community-impact" class="hover:text-white transition-colors">Community Impact</a>
+        <a href="#design-principles" class="hover:text-white transition-colors">Design Principles</a>
+      </nav>
+
+      <!-- Action Button -->
+      <div class="flex items-center gap-3">
+        <button id="openDeployModalBtn" class="px-3.5 py-2 rounded-xl bg-slate-800/90 hover:bg-slate-700 text-slate-200 text-xs sm:text-sm font-medium border border-slate-700/80 transition-all flex items-center gap-2 shadow-sm">
+          <i class="fa-brands fa-github text-base"></i>
+          <span>Deploy Guide</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Content Container -->
+  <main class="relative z-10">
+
+    <!-- HERO SECTION: Visual Hierarchy & Contrast -->
+    <section class="pt-12 pb-10 sm:pt-16 sm:pb-14 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
+      <div class="text-center max-w-3xl mx-auto">
+        <!-- Status Pill -->
+        <div class="inline-flex items-center gap-2.5 px-3.5 py-1.5 rounded-full bg-slate-900/90 border border-slate-700/80 mb-6 shadow-inner">
+          <span id="modelStatusDot" class="w-2.5 h-2.5 rounded-full bg-amber-400 animate-pulse"></span>
+          <span id="modelStatusText" class="text-xs font-mono text-slate-300">Initializing Teachable Machine Model...</span>
+        </div>
+
+        <!-- Primary Headline (Strong Typographic Hierarchy) -->
+        <h1 class="text-3xl sm:text-5xl lg:text-6xl font-extrabold tracking-tight text-white leading-[1.12] mb-5">
+          Accessible Edge AI for
+          <span class="bg-gradient-to-r from-indigo-400 via-sky-300 to-emerald-400 bg-clip-text text-transparent">
+            Community Empowerment
+          </span>
+        </h1>
+
+        <!-- Supporting Subtitle -->
+        <p class="text-base sm:text-lg text-slate-300 leading-relaxed max-w-2xl mx-auto mb-8">
+          Real-time client-side image classification powered by Google Teachable Machine and TensorFlow.js. Zero backend servers, complete privacy, and instant visual intelligence directly in your browser.
+        </p>
+
+        <!-- Model Endpoint Badge -->
+        <div class="inline-flex flex-wrap items-center justify-center gap-2 text-xs font-mono text-slate-400 bg-slate-900/70 px-4 py-2 rounded-xl border border-slate-800">
+          <i class="fa-solid fa-link text-indigo-400"></i>
+          <span>Model Endpoint:</span>
+          <a href="https://teachablemachine.withgoogle.com/models/lhdUPCeYm/" target="_blank" rel="noopener noreferrer" class="text-indigo-300 hover:text-indigo-200 underline decoration-indigo-500/40 truncate max-w-[240px] sm:max-w-md">
+            teachablemachine.withgoogle.com/models/lhdUPCeYm/
+          </a>
+        </div>
+      </div>
+    </section>
+
+    <!-- CENTRAL FOCAL POINT (EMPHASIS & BALANCE): Interactive AI Inference Studio -->
+    <section id="inference-studio" class="py-6 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
+      <div class="bg-slateSurface/85 backdrop-blur-xl border border-slate-800/90 rounded-3xl p-5 sm:p-8 shadow-2xl shadow-black/50">
+        
+        <!-- Studio Top Control Bar -->
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-6 mb-6 border-b border-slate-800">
+          <div>
+            <div class="flex items-center gap-2">
+              <span class="px-2.5 py-0.5 text-[11px] font-mono uppercase tracking-wider rounded-md bg-emerald-500/15 text-emerald-300 border border-emerald-500/30">
+                Primary Focal Point
+              </span>
+              <span id="classCountBadge" class="px-2.5 py-0.5 text-[11px] font-mono rounded-md bg-slate-800 text-slate-300 border border-slate-700">
+                Loading classes...
+              </span>
+            </div>
+            <h2 class="text-xl sm:text-2xl font-bold text-white mt-2">Real-Time Visual Recognition Studio</h2>
+          </div>
+
+          <!-- Input Mode Switcher (Webcam vs Image Upload) -->
+          <div class="inline-flex p-1 rounded-2xl bg-obsidian border border-slate-800 self-start sm:self-auto">
+            <button id="modeWebcamBtn" class="px-4 py-2 rounded-xl text-sm font-semibold transition-all flex items-center gap-2 bg-indigo-600 text-white shadow-md shadow-indigo-600/30">
+              <i class="fa-solid fa-video"></i>
+              <span>Live Webcam</span>
+            </button>
+            <button id="modeUploadBtn" class="px-4 py-2 rounded-xl text-sm font-semibold transition-all flex items-center gap-2 text-slate-400 hover:text-white">
+              <i class="fa-solid fa-image"></i>
+              <span>Upload Image</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Symmetrical 2-Column Grid (Balance & Alignment) -->
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+          
+          <!-- Left Column (7 cols): Visual Sensor Input Viewport -->
+          <div class="lg:col-span-7 flex flex-col gap-4">
+            
+            <!-- WEBCAM VIEWPORT -->
+            <div id="webcamPanel" class="relative rounded-2xl overflow-hidden bg-obsidian border border-slate-800 aspect-video flex items-center justify-center shadow-inner">
+              <!-- Live Canvas / Video Container -->
+              <div id="webcamCanvasContainer" class="w-full h-full flex items-center justify-center [&>canvas]:w-full [&>canvas]:h-full [&>canvas]:object-cover"></div>
+
+              <!-- Empty / Standby Overlay -->
+              <div id="webcamPlaceholder" class="absolute inset-0 flex flex-col items-center justify-center p-6 text-center bg-obsidian/95">
+                <div class="w-16 h-16 rounded-2xl bg-indigo-500/15 border border-indigo-500/30 flex items-center justify-center text-indigo-400 mb-4">
+                  <i class="fa-solid fa-camera text-2xl"></i>
+                </div>
+                <h3 class="text-lg font-semibold text-white mb-1">Camera Standby</h3>
+                <p class="text-sm text-slate-400 max-w-sm mb-5">
+                  Activate your device camera to classify objects in real time. All video frames stay 100% private on your device.
+                </p>
+                <button id="startWebcamBtn" class="px-6 py-3 rounded-xl bg-gradient-to-r from-indigo-500 to-indigo-600 hover:from-indigo-400 hover:to-indigo-500 text-white font-semibold text-sm shadow-lg shadow-indigo-500/25 transition-all flex items-center gap-2">
+                  <i class="fa-solid fa-play"></i>
+                  <span>Start Live Camera</span>
+                </button>
+              </div>
+
+              <!-- Live Telemetry Overlay Badge -->
+              <div id="liveOverlayHUD" class="hidden absolute top-3 left-3 right-3 flex items-center justify-between pointer-events-none">
+                <span class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-obsidian/80 backdrop-blur-md border border-emerald-500/40 text-xs font-mono text-emerald-300">
+                  <span class="w-2 h-2 rounded-full bg-emerald-400 animate-ping"></span>
+                  LIVE INFERENCE
+                </span>
+                <span id="fpsCounter" class="px-3 py-1 rounded-full bg-obsidian/80 backdrop-blur-md border border-slate-700 text-xs font-mono text-slate-300">
+                  -- FPS
+                </span>
+              </div>
+            </div>
+
+            <!-- Webcam Action Toolbar -->
+            <div id="webcamControls" class="flex flex-wrap items-center justify-between gap-3 bg-obsidian/60 p-3 rounded-2xl border border-slate-800/80">
+              <div class="flex items-center gap-2">
+                <button id="toggleWebcamBtn" class="px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs sm:text-sm font-semibold transition-all flex items-center gap-2">
+                  <i class="fa-solid fa-video"></i>
+                  <span id="toggleWebcamLabel">Enable Camera</span>
+                </button>
+                <button id="mirrorBtn" class="px-3.5 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs sm:text-sm font-medium border border-slate-700 transition-all flex items-center gap-2" title="Flip Horizontal Mirror">
+                  <i class="fa-solid fa-left-right"></i>
+                  <span>Mirror: <strong id="mirrorStateText" class="text-indigo-300">ON</strong></span>
+                </button>
+              </div>
+              <span class="text-xs font-mono text-slate-400">
+                <i class="fa-solid fa-shield-halved text-emerald-400 mr-1"></i>On-Device WebGL
+              </span>
+            </div>
+
+            <!-- STATIC IMAGE UPLOAD VIEWPORT (Hidden by default) -->
+            <div id="uploadPanel" class="hidden flex-col gap-4">
+              <label id="dropZone" for="imageFileInput" class="relative rounded-2xl border-2 border-dashed border-slate-700 hover:border-indigo-400 bg-obsidian/80 aspect-video flex flex-col items-center justify-center p-6 text-center cursor-pointer transition-all overflow-hidden group">
+                <input id="imageFileInput" type="file" accept="image/*" class="hidden" />
+                
+                <!-- Preview Image -->
+                <img id="uploadedImagePreview" src="" alt="Uploaded preview for AI classification" class="hidden max-h-full max-w-full object-contain rounded-xl z-10" />
+
+                <!-- Upload Prompt -->
+                <div id="uploadPrompt" class="flex flex-col items-center">
+                  <div class="w-16 h-16 rounded-2xl bg-slate-800 group-hover:bg-indigo-500/20 border border-slate-700 group-hover:border-indigo-500/40 flex items-center justify-center text-slate-300 group-hover:text-indigo-300 mb-4 transition-colors">
+                    <i class="fa-solid fa-cloud-arrow-up text-2xl"></i>
+                  </div>
+                  <p class="text-base font-semibold text-white mb-1">Drop an image here or click to browse</p>
+                  <p class="text-xs text-slate-400">Supports PNG, JPG, WEBP — instant client-side prediction</p>
+                </div>
+              </label>
+
+              <div class="flex items-center justify-between bg-obsidian/60 p-3 rounded-2xl border border-slate-800/80">
+                <button id="selectAnotherImgBtn" type="button" class="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs sm:text-sm font-medium border border-slate-700 transition-all flex items-center gap-2">
+                  <i class="fa-solid fa-folder-open"></i>
+                  <span>Choose Image File</span>
+                </button>
+                <span class="text-xs text-slate-400">Ideal for devices without a webcam</span>
+              </div>
+            </div>
+
+            <!-- Error / Message Banner (No alert() ever used) -->
+            <div id="statusMessageBox" class="hidden rounded-2xl p-4 bg-rose-500/10 border border-rose-500/30 text-rose-200 text-sm flex items-start gap-3">
+              <i class="fa-solid fa-circle-exclamation text-rose-400 mt-0.5"></i>
+              <div class="flex-1">
+                <p id="statusMessageTitle" class="font-semibold text-rose-100">Notice</p>
+                <p id="statusMessageBody" class="text-xs text-rose-200/90 mt-0.5"></p>
+              </div>
+            </div>
+
+          </div>
+
+          <!-- Right Column (5 cols): Classification Results & Confidence Bars (Proportion & Scale) -->
+          <div class="lg:col-span-5 flex flex-col gap-5 bg-obsidian/80 border border-slate-800/90 rounded-2xl p-5 sm:p-6">
+            
+            <!-- Top Prediction Highlight Card (Emphasis & High Contrast) -->
+            <div class="p-5 rounded-2xl bg-gradient-to-br from-indigo-950/90 via-slate-900 to-emerald-950/50 border border-indigo-500/30 shadow-lg">
+              <div class="flex items-center justify-between mb-2">
+                <span class="text-xs font-mono uppercase tracking-wider text-indigo-300">Top Detected Class</span>
+                <span id="topConfidenceBadge" class="px-2.5 py-0.5 rounded-full text-xs font-mono font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
+                  0.0%
+                </span>
+              </div>
+              <div id="topClassName" class="text-2xl sm:text-3xl font-extrabold text-white tracking-tight truncate">
+                Awaiting Input...
+              </div>
+              <p id="topClassSubtext" class="text-xs text-slate-400 mt-1.5">
+                Start the live camera or upload an image to view real-time probability scores.
+              </p>
+            </div>
+
+            <!-- All Class Confidence Bars (Rhythm, Repetition & Proportion) -->
+            <div>
+              <div class="flex items-center justify-between mb-3">
+                <h3 class="text-xs font-mono uppercase tracking-wider text-slate-400">Class Probability Breakdown</h3>
+                <span class="text-xs font-mono text-slate-500">0% — 100%</span>
+              </div>
+              
+              <div id="predictionsList" class="space-y-3.5">
+                <!-- Dynamically populated from Teachable Machine metadata.json -->
+                <div class="animate-pulse space-y-3">
+                  <div class="h-12 bg-slate-800/60 rounded-xl"></div>
+                  <div class="h-12 bg-slate-800/60 rounded-xl"></div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Model Metadata Footer -->
+            <div class="pt-4 border-t border-slate-800/80 flex items-center justify-between text-xs text-slate-400 font-mono">
+              <span id="modelNameMeta">Model: Teachable Machine</span>
+              <span id="tfBackendMeta">TF.js Ready</span>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </section>
+
+    <!-- SECTION 1: SIGNIFICANCE TO THE COMMUNITY -->
+    <section id="community-impact" class="py-16 sm:py-20 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
+      <!-- Section Header -->
+      <div class="max-w-3xl mb-12">
+        <span class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/15 border border-emerald-500/30 text-emerald-300 text-xs font-mono uppercase tracking-wider mb-4">
+          <i class="fa-solid fa-earth-americas"></i>
+          1. Significance to the Community
+        </span>
+        <h2 class="text-3xl sm:text-4xl font-extrabold text-white tracking-tight mb-4">
+          Democratizing Artificial Intelligence for Local Impact
+        </h2>
+        <p class="text-slate-300 text-base sm:text-lg leading-relaxed">
+          Traditionally, computer vision required expensive GPU clusters, cloud subscriptions, and specialized engineering teams. By combining <strong class="text-white">Google Teachable Machine</strong> with static web hosting on <strong class="text-white">GitHub Pages</strong>, anyone in the community can build, share, and deploy meaningful AI tools for free.
+        </p>
+      </div>
+
+      <!-- 4-Card Balanced Grid (Balance, Alignment & Repetition) -->
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        
+        <!-- Card 1: Inclusive STEM Education -->
+        <article class="bg-slateSurface/80 border border-slate-800 hover:border-indigo-500/50 rounded-2xl p-6 transition-all flex flex-col justify-between group">
+          <div>
+            <div class="w-12 h-12 rounded-xl bg-indigo-500/15 border border-indigo-500/30 flex items-center justify-center text-indigo-400 mb-5 group-hover:scale-110 transition-transform">
+              <i class="fa-solid fa-graduation-cap text-xl"></i>
+            </div>
+            <h3 class="text-lg font-bold text-white mb-2.5">Inclusive STEM Education</h3>
+            <p class="text-sm text-slate-300 leading-relaxed">
+              Students and teachers can train custom visual models in minutes—learning how training data, bias, and confidence thresholds work hands-on without complex coding setups.
+            </p>
+          </div>
+          <div class="mt-6 pt-4 border-t border-slate-800/80 text-xs font-mono text-indigo-300">
+            Zero-Cost Classroom Labs
+          </div>
+        </article>
+
+        <!-- Card 2: Assistive Accessibility Tools -->
+        <article class="bg-slateSurface/80 border border-slate-800 hover:border-emerald-500/50 rounded-2xl p-6 transition-all flex flex-col justify-between group">
+          <div>
+            <div class="w-12 h-12 rounded-xl bg-emerald-500/15 border border-emerald-500/30 flex items-center justify-center text-emerald-400 mb-5 group-hover:scale-110 transition-transform">
+              <i class="fa-solid fa-universal-access text-xl"></i>
+            </div>
+            <h3 class="text-lg font-bold text-white mb-2.5">Assistive Accessibility</h3>
+            <p class="text-sm text-slate-300 leading-relaxed">
+              Empowers communities to build tailored assistive aids—such as recognizing everyday items, signage, or hand gestures—running offline-capable directly on everyday smartphones and laptops.
+            </p>
+          </div>
+          <div class="mt-6 pt-4 border-t border-slate-800/80 text-xs font-mono text-emerald-300">
+            Human-Centered Design
+          </div>
+        </article>
+
+        <!-- Card 3: Environmental & Civic Action -->
+        <article class="bg-slateSurface/80 border border-slate-800 hover:border-sky-500/50 rounded-2xl p-6 transition-all flex flex-col justify-between group">
+          <div>
+            <div class="w-12 h-12 rounded-xl bg-sky-500/15 border border-sky-500/30 flex items-center justify-center text-sky-400 mb-5 group-hover:scale-110 transition-transform">
+              <i class="fa-solid fa-seedling text-xl"></i>
+            </div>
+            <h3 class="text-lg font-bold text-white mb-2.5">Civic & Eco Stewardship</h3>
+            <p class="text-sm text-slate-300 leading-relaxed">
+              Neighborhoods, farms, and schools can deploy instant classifiers for smart waste-sorting stations, local plant identification, or agricultural crop health monitoring.
+            </p>
+          </div>
+          <div class="mt-6 pt-4 border-t border-slate-800/80 text-xs font-mono text-sky-300">
+            Sustainable Local Solutions
+          </div>
+        </article>
+
+        <!-- Card 4: Privacy-First Edge Computing -->
+        <article class="bg-slateSurface/80 border border-slate-800 hover:border-violet-500/50 rounded-2xl p-6 transition-all flex flex-col justify-between group">
+          <div>
+            <div class="w-12 h-12 rounded-xl bg-violet-500/15 border border-violet-500/30 flex items-center justify-center text-violet-400 mb-5 group-hover:scale-110 transition-transform">
+              <i class="fa-solid fa-lock text-xl"></i>
+            </div>
+            <h3 class="text-lg font-bold text-white mb-2.5">100% Privacy & Zero Servers</h3>
+            <p class="text-sm text-slate-300 leading-relaxed">
+              Because TensorFlow.js executes inference locally inside the user's browser, camera feeds never leave the device—protecting community privacy while eliminating hosting bills.
+            </p>
+          </div>
+          <div class="mt-6 pt-4 border-t border-slate-800/80 text-xs font-mono text-violet-300">
+            Client-Side Edge AI
+          </div>
+        </article>
+
+      </div>
+    </section>
+
+    <!-- SECTION 2 & 3: APPLIED PRINCIPLES OF DESIGN SHOWCASE -->
+    <section id="design-principles" class="py-16 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto border-t border-slate-800/80">
+      <div class="flex flex-col lg:flex-row lg:items-end justify-between gap-6 mb-12">
+        <div class="max-w-2xl">
+          <span class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-500/15 border border-indigo-500/30 text-indigo-300 text-xs font-mono uppercase tracking-wider mb-4">
+            <i class="fa-solid fa-compass-drafting"></i>
+            Architecture & Craft
+          </span>
+          <h2 class="text-3xl sm:text-4xl font-extrabold text-white tracking-tight mb-3">
+            All 7 Core Principles of Design Applied
+          </h2>
+          <p class="text-slate-300 text-base">
+            Every visual and interactive decision in this interface follows foundational graphic and UI/UX design principles to maximize clarity, trust, and usability.
+          </p>
+        </div>
+        <div class="text-xs font-mono text-slate-400 bg-slateSurface px-4 py-2.5 rounded-xl border border-slate-800">
+          Interactive Reference: Click any principle to highlight its role
+        </div>
+      </div>
+
+      <!-- 7 Design Principles Grid -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+        
+        <div class="p-5 rounded-2xl bg-slateSurface/70 border border-slate-800 hover:border-indigo-400/50 transition-all">
+          <div class="flex items-center justify-between mb-3">
+            <span class="text-xs font-mono text-indigo-400 font-semibold">01 / HIERARCHY</span>
+            <i class="fa-solid fa-layer-group text-slate-400"></i>
+          </div>
+          <h3 class="font-bold text-white mb-1.5">Visual Hierarchy</h3>
+          <p class="text-xs text-slate-300 leading-relaxed">
+            Clear typographic scale guides the eye from the hero headline to the live AI studio, top predicted label, and secondary probability bars.
+          </p>
+        </div>
+
+        <div class="p-5 rounded-2xl bg-slateSurface/70 border border-slate-800 hover:border-indigo-400/50 transition-all">
+          <div class="flex items-center justify-between mb-3">
+            <span class="text-xs font-mono text-emerald-400 font-semibold">02 / BALANCE</span>
+            <i class="fa-solid fa-scale-balanced text-slate-400"></i>
+          </div>
+          <h3 class="font-bold text-white mb-1.5">Balance & Alignment</h3>
+          <p class="text-xs text-slate-300 leading-relaxed">
+            Asymmetrical 7:5 studio split pairs heavy visual video weight on the left with structured data cards on the right along a strict 12-column grid.
+          </p>
+        </div>
+
+        <div class="p-5 rounded-2xl bg-slateSurface/70 border border-slate-800 hover:border-indigo-400/50 transition-all">
+          <div class="flex items-center justify-between mb-3">
+            <span class="text-xs font-mono text-sky-400 font-semibold">03 / CONTRAST</span>
+            <i class="fa-solid fa-circle-half-stroke text-slate-400"></i>
+          </div>
+          <h3 class="font-bold text-white mb-1.5">High Contrast</h3>
+          <p class="text-xs text-slate-300 leading-relaxed">
+            Crisp white typography and luminous emerald/indigo active indicators stand out cleanly against deep obsidian surfaces for effortless legibility.
+          </p>
+        </div>
+
+        <div class="p-5 rounded-2xl bg-slateSurface/70 border border-slate-800 hover:border-indigo-400/50 transition-all">
+          <div class="flex items-center justify-between mb-3">
+            <span class="text-xs font-mono text-amber-400 font-semibold">04 / EMPHASIS</span>
+            <i class="fa-solid fa-bullseye text-slate-400"></i>
+          </div>
+          <h3 class="font-bold text-white mb-1.5">Focal Emphasis</h3>
+          <p class="text-xs text-slate-300 leading-relaxed">
+            The interactive camera viewport and the "Top Detected Class" badge use elevated borders, glow accents, and larger typography as primary focal points.
+          </p>
+        </div>
+
+        <div class="p-5 rounded-2xl bg-slateSurface/70 border border-slate-800 hover:border-indigo-400/50 transition-all">
+          <div class="flex items-center justify-between mb-3">
+            <span class="text-xs font-mono text-violet-400 font-semibold">05 / PROPORTION</span>
+            <i class="fa-solid fa-ruler-combined text-slate-400"></i>
+          </div>
+          <h3 class="font-bold text-white mb-1.5">Proportion & Scale</h3>
+          <p class="text-xs text-slate-300 leading-relaxed">
+            Harmonious 16:9 viewport ratios, modular padding scales, and real-time confidence bars visually encode exact percentage proportions.
+          </p>
+        </div>
+
+        <div class="p-5 rounded-2xl bg-slateSurface/70 border border-slate-800 hover:border-indigo-400/50 transition-all">
+          <div class="flex items-center justify-between mb-3">
+            <span class="text-xs font-mono text-pink-400 font-semibold">06 / RHYTHM</span>
+            <i class="fa-solid fa-wave-square text-slate-400"></i>
+          </div>
+          <h3 class="font-bold text-white mb-1.5">Rhythm & Repetition</h3>
+          <p class="text-xs text-slate-300 leading-relaxed">
+            Consistent rounded-2xl card geometry, uniform icon badges, and repeating prediction meter rows establish a predictable visual cadence.
+          </p>
+        </div>
+
+        <div class="p-5 rounded-2xl bg-slateSurface/70 border border-slate-800 hover:border-indigo-400/50 transition-all sm:col-span-2">
+          <div class="flex items-center justify-between mb-3">
+            <span class="text-xs font-mono text-teal-400 font-semibold">07 / UNITY & HARMONY</span>
+            <i class="fa-solid fa-circles-overlap text-slate-400"></i>
+          </div>
+          <h3 class="font-bold text-white mb-1.5">Unity, Harmony & Whitespace</h3>
+          <p class="text-xs text-slate-300 leading-relaxed">
+            A cohesive slate-indigo-emerald color system, paired Inter + JetBrains Mono typefaces, and generous breathing room unify the AI model, community mission, and interface into one seamless experience.
+          </p>
+        </div>
+
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Footer -->
+  <footer class="relative z-10 border-t border-slate-800/90 bg-obsidian/90 py-10 px-4 sm:px-6 lg:px-8 mt-10">
+    <div class="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4 text-sm text-slate-400">
+      <div class="flex items-center gap-2.5">
+        <span class="w-2.5 h-2.5 rounded-full bg-emerald-400"></span>
+        <span>Built for <strong class="text-slate-200">GitHub Pages</strong> &bull; Powered by Google Teachable Machine</span>
+      </div>
+      <div class="font-mono text-xs text-slate-500">
+        Model ID: lhdUPCeYm &bull; Client-Side TensorFlow.js
+      </div>
+    </div>
+  </footer>
+
+  <!-- GitHub Pages Deployment Guide Modal -->
+  <div id="deployModal" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/75 backdrop-blur-sm">
+    <div class="bg-slateSurface border border-slate-700 rounded-3xl max-w-lg w-full p-6 sm:p-7 shadow-2xl relative">
+      <div class="flex items-center justify-between pb-4 mb-4 border-b border-slate-800">
+        <div class="flex items-center gap-2.5">
+          <i class="fa-brands fa-github text-xl text-white"></i>
+          <h3 class="text-lg font-bold text-white">Host on GitHub Pages in 60 Seconds</h3>
+        </div>
+        <button id="closeDeployModalBtn" class="w-8 h-8 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 flex items-center justify-center">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+
+      <ol class="space-y-3 text-sm text-slate-300 list-decimal list-inside mb-6">
+        <li>Create a new public repository on <strong class="text-white">GitHub</strong> (e.g., <code class="text-indigo-300 font-mono">ai-community-vision</code>).</li>
+        <li>Save this exact single-file code as <code class="text-emerald-300 font-mono">index.html</code> in the root of your repository.</li>
+        <li>Open <strong class="text-white">Settings &rarr; Pages</strong> in your GitHub repository.</li>
+        <li>Under <strong class="text-white">Build and deployment</strong>, select <code class="text-indigo-300 font-mono">Deploy from a branch</code> &rarr; <code class="text-indigo-300 font-mono">main</code> (<code class="text-indigo-300 font-mono">/root</code>) and click <strong class="text-white">Save</strong>.</li>
+        <li>Remember: GitHub Pages automatically serves over <strong class="text-emerald-300">HTTPS</strong>, which is required by browsers to unlock webcam access!</li>
+      </ol>
+
+      <div class="flex items-center justify-end gap-3">
+        <button id="closeDeployModalBottomBtn" class="px-5 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-sm font-semibold transition-all">
+          Got It
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Teachable Machine & Interactive UI Logic -->
+  <script>
+    // =========================================================================
+    // CONFIGURATION: Google Teachable Machine Model URL
+    // =========================================================================
+    const MODEL_URL = "https://teachablemachine.withgoogle.com/models/lhdUPCeYm/";
+
+    // Application State
+    let model = null;
+    let webcam = null;
+    let maxPredictions = 0;
+    let isWebcamRunning = false;
+    let isMirrored = true;
+    let activeMode = "webcam"; // 'webcam' | 'upload'
+    let animationFrameId = null;
+
+    // FPS Calculation State
+    let lastFrameTime = performance.now();
+    let frameCount = 0;
+
+    // DOM Element References
+    const modelStatusDot = document.getElementById("modelStatusDot");
+    const modelStatusText = document.getElementById("modelStatusText");
+    const classCountBadge = document.getElementById("classCountBadge");
+    const modelNameMeta = document.getElementById("modelNameMeta");
+    const tfBackendMeta = document.getElementById("tfBackendMeta");
+
+    const modeWebcamBtn = document.getElementById("modeWebcamBtn");
+    const modeUploadBtn = document.getElementById("modeUploadBtn");
+    const webcamPanel = document.getElementById("webcamPanel");
+    const webcamControls = document.getElementById("webcamControls");
+    const uploadPanel = document.getElementById("uploadPanel");
+
+    const webcamCanvasContainer = document.getElementById("webcamCanvasContainer");
+    const webcamPlaceholder = document.getElementById("webcamPlaceholder");
+    const startWebcamBtn = document.getElementById("startWebcamBtn");
+    const toggleWebcamBtn = document.getElementById("toggleWebcamBtn");
+    const toggleWebcamLabel = document.getElementById("toggleWebcamLabel");
+    const mirrorBtn = document.getElementById("mirrorBtn");
+    const mirrorStateText = document.getElementById("mirrorStateText");
+    const liveOverlayHUD = document.getElementById("liveOverlayHUD");
+    const fpsCounter = document.getElementById("fpsCounter");
+
+    const dropZone = document.getElementById("dropZone");
+    const imageFileInput = document.getElementById("imageFileInput");
+    const uploadedImagePreview = document.getElementById("uploadedImagePreview");
+    const uploadPrompt = document.getElementById("uploadPrompt");
+    const selectAnotherImgBtn = document.getElementById("selectAnotherImgBtn");
+
+    const topClassName = document.getElementById("topClassName");
+    const topConfidenceBadge = document.getElementById("topConfidenceBadge");
+    const topClassSubtext = document.getElementById("topClassSubtext");
+    const predictionsList = document.getElementById("predictionsList");
+
+    const statusMessageBox = document.getElementById("statusMessageBox");
+    const statusMessageTitle = document.getElementById("statusMessageTitle");
+    const statusMessageBody = document.getElementById("statusMessageBody");
+
+    // Modal Elements
+    const deployModal = document.getElementById("deployModal");
+    const openDeployModalBtn = document.getElementById("openDeployModalBtn");
+    const closeDeployModalBtn = document.getElementById("closeDeployModalBtn");
+    const closeDeployModalBottomBtn = document.getElementById("closeDeployModalBottomBtn");
+
+    // =========================================================================
+    // UTILITY: Non-Intrusive Status & Error Message Banner (Never uses alert())
+    // =========================================================================
+    function showBannerMessage(title, message) {
+      statusMessageTitle.textContent = title;
+      statusMessageBody.textContent = message;
+      statusMessageBox.classList.remove("hidden");
+    }
+
+    function hideBannerMessage() {
+      statusMessageBox.classList.add("hidden");
+    }
+
+    // =========================================================================
+    // STEP 1: Load Teachable Machine Model & Metadata on Page Init
+    // =========================================================================
+    async function initTeachableMachine() {
+      try {
+        const modelJSON = MODEL_URL + "model.json";
+        const metadataJSON = MODEL_URL + "metadata.json";
+
+        // Load model via @teachablemachine/image
+        model = await tmImage.load(modelJSON, metadataJSON);
+        maxPredictions = model.getTotalClasses();
+
+        // Update UI Status Indicators
+        modelStatusDot.classList.remove("bg-amber-400", "animate-pulse");
+        modelStatusDot.classList.add("bg-emerald-400");
+        modelStatusText.textContent = "Model Loaded & Ready (Client-Side)";
+        classCountBadge.textContent = `${maxPredictions} Classes Detected`;
+
+        // Extract optional metadata details if available
+        const metadata = model.getMetadata ? model.getMetadata() : null;
+        if (metadata && metadata.modelName) {
+          modelNameMeta.textContent = `Model: ${metadata.modelName}`;
+        }
+        if (typeof tf !== "undefined" && tf.getBackend) {
+          tfBackendMeta.textContent = `Backend: ${tf.getBackend().toUpperCase()}`;
+        }
+
+        // Build initial empty probability bars from class labels
+        const labels = model.getClassLabels ? model.getClassLabels() : [];
+        buildPredictionBars(labels);
+
+      } catch (error) {
+        console.error("Failed to load Teachable Machine model:", error);
+        modelStatusDot.classList.remove("bg-amber-400");
+        modelStatusDot.classList.add("bg-rose-500");
+        modelStatusText.textContent = "Model Connection Error";
+        showBannerMessage(
+          "Unable to Load Model",
+          "Please verify your internet connection and ensure the Teachable Machine model URL is publicly shared."
+        );
+      }
+    }
+
+    // =========================================================================
+    // STEP 2: Build & Update Dynamic Confidence Bars (Proportion & Repetition)
+    // =========================================================================
+    function buildPredictionBars(labels) {
+      predictionsList.innerHTML = "";
+      for (let i = 0; i < maxPredictions; i++) {
+        const label = labels[i] || `Class ${i + 1}`;
+        const row = document.createElement("div");
+        row.className = "p-3 rounded-xl bg-slateSurface/90 border border-slate-800/90 transition-all";
+        row.id = `pred-row-${i}`;
+        row.innerHTML = `
+          <div class="flex items-center justify-between text-xs sm:text-sm mb-1.5">
+            <span id="pred-label-${i}" class="font-semibold text-slate-200 truncate pr-2">${escapeHTML(label)}</span>
+            <span id="pred-pct-${i}" class="font-mono font-semibold text-slate-400">0.0%</span>
+          </div>
+          <div class="w-full h-2.5 bg-obsidian rounded-full overflow-hidden border border-slate-800">
+            <div id="pred-bar-${i}" class="h-full rounded-full bg-slate-600 transition-all duration-150" style="width: 0%"></div>
+          </div>
+        `;
+        predictionsList.appendChild(row);
+      }
+    }
+
+    function escapeHTML(str) {
+      const div = document.createElement("div");
+      div.textContent = str;
+      return div.innerHTML;
+    }
+
+    // Run inference on either webcam canvas or static HTMLImageElement
+    async function predictFromSource(imageSource) {
+      if (!model) return;
+
+      const predictions = await model.predict(imageSource);
+      if (!predictions || predictions.length === 0) return;
+
+      // Find top prediction
+      let topIdx = 0;
+      for (let i = 1; i < predictions.length; i++) {
+        if (predictions[i].probability > predictions[topIdx].probability) {
+          topIdx = i;
+        }
+      }
+
+      // Update Top Highlight Card
+      const best = predictions[topIdx];
+      const bestPercent = (best.probability * 100).toFixed(1);
+      topClassName.textContent = best.className;
+      topConfidenceBadge.textContent = `${bestPercent}%`;
+      topClassSubtext.textContent =
+        best.probability >= 0.75
+          ? "High confidence match detected by neural network."
+          : "Moderate confidence — try adjusting lighting or framing.";
+
+      // Update Every Individual Progress Bar
+      for (let i = 0; i < predictions.length; i++) {
+        const p = predictions[i];
+        const pct = (p.probability * 100).toFixed(1);
+        const isTop = i === topIdx && p.probability > 0.05;
+
+        const rowEl = document.getElementById(`pred-row-${i}`);
+        const labelEl = document.getElementById(`pred-label-${i}`);
+        const pctEl = document.getElementById(`pred-pct-${i}`);
+        const barEl = document.getElementById(`pred-bar-${i}`);
+
+        if (labelEl) labelEl.textContent = p.className;
+        if (pctEl) {
+          pctEl.textContent = `${pct}%`;
+          pctEl.className = isTop
+            ? "font-mono font-bold text-emerald-300"
+            : "font-mono font-medium text-slate-400";
+        }
+        if (barEl) {
+          barEl.style.width = `${pct}%`;
+          barEl.className = isTop
+            ? "h-full rounded-full bg-gradient-to-r from-indigo-500 to-emerald-400 transition-all duration-150"
+            : "h-full rounded-full bg-indigo-500/40 transition-all duration-150";
+        }
+        if (rowEl) {
+          rowEl.className = isTop
+            ? "p-3 rounded-xl bg-indigo-950/40 border border-emerald-500/40 transition-all shadow-sm"
+            : "p-3 rounded-xl bg-slateSurface/90 border border-slate-800/90 transition-all";
+        }
+      }
+    }
+
+    // =========================================================================
+    // STEP 3: Live Webcam Control & Animation Loop
+    // =========================================================================
+    async function startWebcam() {
+      if (!model) {
+        showBannerMessage("Model Still Loading", "Please wait a moment for the AI model to finish initializing.");
+        return;
+      }
+      if (isWebcamRunning) return;
+
+      hideBannerMessage();
+      startWebcamBtn.disabled = true;
+      startWebcamBtn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i><span>Requesting Camera...</span>`;
+
+      try {
+        // Create Teachable Machine Webcam instance (width, height, flip)
+        webcam = new tmImage.Webcam(640, 480, isMirrored);
+        await webcam.setup(); // Request browser camera permissions
+        await webcam.play();
+
+        isWebcamRunning = true;
+        webcamCanvasContainer.innerHTML = "";
+        webcamCanvasContainer.appendChild(webcam.canvas);
+
+        webcamPlaceholder.classList.add("hidden");
+        liveOverlayHUD.classList.remove("hidden");
+        toggleWebcamLabel.textContent = "Stop Camera";
+        toggleWebcamBtn.classList.remove("bg-indigo-600", "hover:bg-indigo-500");
+        toggleWebcamBtn.classList.add("bg-rose-600", "hover:bg-rose-500");
+
+        lastFrameTime = performance.now();
+        frameCount = 0;
+        animationFrameId = window.requestAnimationFrame(webcamLoop);
+
+      } catch (err) {
+        console.error("Webcam access error:", err);
+        showBannerMessage(
+          "Camera Access Unavailable",
+          "Could not access your webcam. Please grant camera permissions in your browser or switch to 'Upload Image' mode to test static photos."
+        );
+      } finally {
+        startWebcamBtn.disabled = false;
+        startWebcamBtn.innerHTML = `<i class="fa-solid fa-play"></i><span>Start Live Camera</span>`;
+      }
+    }
+
+    async function stopWebcam() {
+      if (!isWebcamRunning) return;
+      isWebcamRunning = false;
+
+      if (animationFrameId) {
+        cancelAnimationFrame(animationFrameId);
+        animationFrameId = null;
+      }
+      if (webcam) {
+        await webcam.stop();
+        webcam = null;
+      }
+
+      webcamCanvasContainer.innerHTML = "";
+      webcamPlaceholder.classList.remove("hidden");
+      liveOverlayHUD.classList.add("hidden");
+      toggleWebcamLabel.textContent = "Enable Camera";
+      toggleWebcamBtn.classList.remove("bg-rose-600", "hover:bg-rose-500");
+      toggleWebcamBtn.classList.add("bg-indigo-600", "hover:bg-indigo-500");
+    }
+
+    async function webcamLoop() {
+      if (!isWebcamRunning || !webcam) return;
+
+      webcam.update(); // Update video frame onto canvas
+      await predictFromSource(webcam.canvas);
+
+      // Update FPS Counter every 500ms
+      frameCount++;
+      const now = performance.now();
+      if (now - lastFrameTime >= 500) {
+        const fps = Math.round((frameCount * 1000) / (now - lastFrameTime));
+        fpsCounter.textContent = `${fps} FPS`;
+        frameCount = 0;
+        lastFrameTime = now;
+      }
+
+      animationFrameId = window.requestAnimationFrame(webcamLoop);
+    }
+
+    // Toggle Webcam Button
+    toggleWebcamBtn.addEventListener("click", () => {
+      if (isWebcamRunning) {
+        stopWebcam();
+      } else {
+        startWebcam();
+      }
+    });
+
+    startWebcamBtn.addEventListener("click", startWebcam);
+
+    // Mirror Toggle Button
+    mirrorBtn.addEventListener("click", async () => {
+      isMirrored = !isMirrored;
+      mirrorStateText.textContent = isMirrored ? "ON" : "OFF";
+      if (isWebcamRunning) {
+        await stopWebcam();
+        await startWebcam();
+      }
+    });
+
+    // =========================================================================
+    // STEP 4: Mode Switching & Static Image Upload / Drag-and-Drop
+    // =========================================================================
+    modeWebcamBtn.addEventListener("click", () => {
+      if (activeMode === "webcam") return;
+      activeMode = "webcam";
+      hideBannerMessage();
+
+      modeWebcamBtn.className = "px-4 py-2 rounded-xl text-sm font-semibold transition-all flex items-center gap-2 bg-indigo-600 text-white shadow-md shadow-indigo-600/30";
+      modeUploadBtn.className = "px-4 py-2 rounded-xl text-sm font-semibold transition-all flex items-center gap-2 text-slate-400 hover:text-white";
+
+      webcamPanel.classList.remove("hidden");
+      webcamControls.classList.remove("hidden");
+      uploadPanel.classList.add("hidden");
+      uploadPanel.classList.remove("flex");
+    });
+
+    modeUploadBtn.addEventListener("click", async () => {
+      if (activeMode === "upload") return;
+      activeMode = "upload";
+      hideBannerMessage();
+
+      if (isWebcamRunning) {
+        await stopWebcam();
+      }
+
+      modeUploadBtn.className = "px-4 py-2 rounded-xl text-sm font-semibold transition-all flex items-center gap-2 bg-indigo-600 text-white shadow-md shadow-indigo-600/30";
+      modeWebcamBtn.className = "px-4 py-2 rounded-xl text-sm font-semibold transition-all flex items-center gap-2 text-slate-400 hover:text-white";
+
+      webcamPanel.classList.add("hidden");
+      webcamControls.classList.add("hidden");
+      uploadPanel.classList.remove("hidden");
+      uploadPanel.classList.add("flex");
+    });
+
+    function handleUploadedFile(file) {
+      if (!file || !file.type.startsWith("image/")) {
+        showBannerMessage("Invalid File Type", "Please upload a valid image file (JPG, PNG, or WEBP).");
+        return;
+      }
+
+      hideBannerMessage();
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        uploadedImagePreview.src = e.target.result;
+        uploadedImagePreview.classList.remove("hidden");
+        uploadPrompt.classList.add("hidden");
+
+        uploadedImagePreview.onload = async () => {
+          await predictFromSource(uploadedImagePreview);
+        };
+      };
+      reader.readAsDataURL(file);
+    }
+
+    imageFileInput.addEventListener("change", (e) => {
+      if (e.target.files && e.target.files[0]) {
+        handleUploadedFile(e.target.files[0]);
+      }
+    });
+
+    selectAnotherImgBtn.addEventListener("click", () => {
+      imageFileInput.click();
+    });
+
+    // Drag and Drop Events
+    dropZone.addEventListener("dragover", (e) => {
+      e.preventDefault();
+      dropZone.classList.add("border-indigo-400", "bg-indigo-950/20");
+    });
+
+    dropZone.addEventListener("dragleave", () => {
+      dropZone.classList.remove("border-indigo-400", "bg-indigo-950/20");
+    });
+
+    dropZone.addEventListener("drop", (e) => {
+      e.preventDefault();
+      dropZone.classList.remove("border-indigo-400", "bg-indigo-950/20");
+      if (e.dataTransfer.files && e.dataTransfer.files[0]) {
+        handleUploadedFile(e.dataTransfer.files[0]);
+      }
+    });
+
+    // =========================================================================
+    // STEP 5: GitHub Pages Modal Controls & Window Init
+    // =========================================================================
+    openDeployModalBtn.addEventListener("click", () => deployModal.classList.remove("hidden"));
+    closeDeployModalBtn.addEventListener("click", () => deployModal.classList.add("hidden"));
+    closeDeployModalBottomBtn.addEventListener("click", () => deployModal.classList.add("hidden"));
+    deployModal.addEventListener("click", (e) => {
+      if (e.target === deployModal) deployModal.classList.add("hidden");
+    });
+
+    window.addEventListener("load", () => {
+      initTeachableMachine();
+    });
+  </script>
+</body>
+</html>
